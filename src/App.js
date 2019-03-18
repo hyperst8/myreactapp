@@ -1,26 +1,68 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component, Fragment } from 'react';
+import './normalize.css';
+import './skeleton.css';
+import Form from './components/Form';
+import {calculateTotal} from './helper';
+import Result from './components/Result';
+import Message from './components/Message';
+import Spinner from './components/Spinner';
 
 class App extends Component {
+
+  state = {
+    total: '',
+    amount: '',
+    term: '',
+    loading: false
+  }
+
+  loanInformation = (amount, term) => {
+
+    const total = calculateTotal(amount, term);
+
+    this.setState({
+      loading: true
+    }, () => {
+      setTimeout(() => {
+        this.setState({
+          amount,
+          total,
+          term,
+          loading: false
+        })
+      }, 3000)
+    })
+  }
   render() {
+    // destructuring the state
+    const {term, amount, total, loading} = this.state;
+
+    // Conditionally render a component
+    let component;
+    if(total === '' && !loading) {
+      component = <Message />
+    } else if(loading) {
+      component = <Spinner />
+    } else {
+      component = <Result 
+                    total={total}
+                    amount={amount}
+                    term={term}
+                  />
+    }
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Fragment>
+        <h1>Lånekalkulator</h1>
+        <div className="container">
+          <Form 
+            loanInformation={this.loanInformation}
+          />
+
+          <div className="messages">
+            {component}
+          </div>
+        </div>
+      </Fragment>
     );
   }
 }
